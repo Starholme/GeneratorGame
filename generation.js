@@ -253,6 +253,13 @@
 	var initializeUI = function(){
 		$("#toggleGamestate").on("click",toggleGamestate);
 		
+		UiCreateEntityList();
+		
+		uiLoop();
+	};
+	
+	/*Create the list of entities, add to UI*/
+	var UiCreateEntityList = function(){
 		//loop config entities to build menu
 		for (var key in config.entities){
 			var entity = config.entities[key];
@@ -263,16 +270,30 @@
 			}
 			else{
 				item += " cost: $" + entity.cost;
+				item += " qty: <span class='qty'>0</span>";
+				item += " <button id='purchaseId"+key+"'>purchase</button>";
 			}
-			item += " qty: <span class='qty'>0</span>";
 			item += "<div class='individual'></div>";
 			item +="</div>";
 			$("#"+entity.type).append(item);
+			
+			if (entity.type == "source" || entity.type == "sink"){
+				
+			}
+			else{
+				$("#purchaseId"+key).on('click', 
+					function(entityKey){
+						return function(){
+							createEntity(data.regions[0],entityKey);
+						};
+					}(key)
+				);
+			}
+			
 		}
-		
-		uiLoop();
 	};
 	
+	/*Add a single entity in the UI	*/
 	var UiUpdateEntity = function(entity){
 		var qtyNode = $(".entityList."+entity.nameId+" .qty");
 		var qty = parseInt(qtyNode.text()) + 1;
@@ -290,6 +311,7 @@
 		});
 	};
 	
+	/*Update all the entities inputs/outputs*/
 	var updateEntityList = function(){
 		if (data.regions[0] === undefined) return;
 		for (var key in data.regions[0].equipment){
