@@ -3,7 +3,7 @@
 	var game = {};
 	
 	var config = {
-		uiTickSpeed : 500,
+		uiTickSpeed : 250,
 		tickSpeed : {stopped:-1, normal: 1000},
 		resourceTypes : {
 			e:{name:"Electricity", unit:"kw"},
@@ -15,16 +15,16 @@
 				type:"sink",
 				inputs:{e: 1000},
 				outputs:{},
-				cost:1,
+				cost:0.14,
 				buildable:false,
 				id:-1
 			},
-			"OilGenset":{
-				name:"Oil Genset",
+			"OilGenset20kw":{
+				name:"Oil Genset 20kw",
 				type:"electricGeneration",
-				inputs:{o:1},
-				outputs:{e:10},
-				cost:1000,
+				inputs:{o:6},
+				outputs:{e:20},
+				cost:5000,
 				buildable:true,
 				id:-1
 			},
@@ -33,9 +33,15 @@
 				type:"source",
 				inputs:{},
 				outputs:{o:10},
-				cost:2,
+				cost:1.27,
 				buildable:false,
 				id:-1
+			},
+			"OilTank100":{
+				name:"Oil Tank 100L",
+				type:"storage",
+				storage:{o:100},
+				cost:500
 			}
 		}
 	};
@@ -62,6 +68,10 @@
 		outputsByType:{
 			e:[],
 			o:[]
+		},
+		storageByType:{
+			e:[],
+			o:[]
 		}
 	};
 	
@@ -70,15 +80,18 @@
 	}
 	
 	var initialize = function(){
-		data.money = 100000;
+		data.money = 5600;
 		
 		initializeUI();
 		
-		var cr = createRegion();
+		var r = createRegion();
 		
-		createEntity(cr,"OilTruck");
-		createEntity(cr,"OilGenset");
-		createEntity(cr,"ElectricalSubstation");
+		r.name = "Tiny Island";
+		
+		createEntity(r,"OilTruck");
+
+		var e = createEntity(r,"ElectricalSubstation");
+		e.cost = 0.45;
 	};
 	game.initialize = initialize;
 	$().ready(initialize);
@@ -115,6 +128,14 @@
 				processInputBuffer(resKey, inputs[i], region);
 			}
 		}
+		
+		//Process storage
+		for (var resKey in region.storageByType){
+			var storages = region.storageByType[resKey];
+			for (var i = 0; i<storages.length; i++){
+				processStorage(resKey, storages[i], region);
+			}
+		}
 	};
 	
 	var processInputBuffer = function(resKey, equipId, region){
@@ -123,11 +144,13 @@
 		
 		if (roomInBuffer == 0) return;
 		
+		//Look in output buffers
 		var outputBuffers = region.outputsByType[resKey]
 		for (var i = 0; i < outputBuffers.length; i++){
 			var srcEquip = region.equipmentById[outputBuffers[i]];
 			
 			var qtyInSrc = srcEquip.outputs[resKey+"buffer"];
+			if (qtyInSrc == 0) break;
 			var max = qtyInSrc > roomInBuffer ? roomInBuffer : qtyInSrc;
 			
 			roomInBuffer -= max;
@@ -136,41 +159,100 @@
 			
 			if (roomInBuffer == 0) break;
 		}
+		
+		//Look in storage
+		var storage = region.storageByType[resKey]
+		for (var i = 0; i < storage.length; i++){
+			var srcEquip = region.equipmentById[storage[i]];
+			
+			var qtyInSrc = srcEquip.storage[resKey+"buffer"];
+			if (qtyInSrc == 0) break;
+			var max = qtyInSrc > roomInBuffer ? roomInBuffer : qtyInSrc;
+			
+			roomInBuffer -= max;
+			srcEquip.storage[resKey+"buffer"] -= max;
+			equip.inputs[resKey+"buffer"] += max;
+			
+			if (roomInBuffer == 0) break;
+		}
+	};
+	
+	var processStorage = function(resKey, equipId, region){
+		var equip = region.equipmentById[equipId];
+		var roomInBuffer = equip.storage[resKey] - equip.storage[resKey + "buffer"];
+		
+		if (roomInBuffer == 0) return;
+		
+		//Look in output buffers
+		var outputBuffers = region.outputsByType[resKey]
+		for (var i = 0; i < outputBuffers.length; i++){
+			var srcEquip = region.equipmentById[outputBuffers[i]];
+			
+			var qtyInSrc = srcEquip.outputs[resKey+"buffer"];
+			if (qtyInSrc == 0) break;
+			var max = qtyInSrc > roomInBuffer ? roomInBuffer : qtyInSrc;
+			
+			roomInBuffer -= max;
+			srcEquip.outputs[resKey+"buffer"] -= max;
+			equip.storage[resKey+"buffer"] += max;
+			
+			if (roomInBuffer == 0) break;
+		}
 	};
 	
 	var processEquipment = function(equip){
 		if (!equip.enabled) return;
-		//Handles sources and sinks
+		//Handles sources
 		if (equip.type == "source"){
-			for (var resourceKey in equip.outputs){
-				if (resourceKey.substr(resourceKey.length-6) === "buffer") continue;
-				var qty = equip.outputs[resourceKey] - equip.outputs[resourceKey+"buffer"];
-				if (qty == 0){continue;}
-				
-				var cost = qty * equip.cost;
-				if (cost > data.money){
-					cost = data.money;
-					qty = data.money / equip.cost;
-				}
-				data.money -= cost;
-				equip.outputs[resourceKey+"buffer"] += qty;
-			}
+			processEquipmentSource(equip);
 			return;
 		}
+		//Handle sinks
 		else if (equip.type == "sink"){
-			for (var resourceKey in equip.inputs){
-				if (resourceKey.substr(resourceKey.length-6) === "buffer") continue;
-				var qty = equip.inputs[resourceKey+"buffer"];
-				if (qty == 0){continue;}
-				
-				var value = qty * equip.cost;
-				
-				data.money += value;
-				equip.inputs[resourceKey+"buffer"] -= qty;
-			}
+			processEquipmentSink(equip);
 			return;
 		}
-
+		//Ignore storage
+		else if (equip.type == "storage"){
+			return;
+		}
+		//Handle converters
+		else{
+			processEquipmentConverter(equip);
+			return;
+		}
+	};
+	
+	var processEquipmentSource = function(equip){
+		for (var resourceKey in equip.outputs){
+			if (resourceKey.substr(resourceKey.length-6) === "buffer") continue;
+			var qty = equip.outputs[resourceKey] - equip.outputs[resourceKey+"buffer"];
+			if (qty == 0){continue;}
+			
+			var cost = qty * equip.cost;
+			if (cost > data.money){
+				cost = data.money;
+				qty = data.money / equip.cost;
+			}
+			data.money -= cost;
+			equip.outputs[resourceKey+"buffer"] += qty;
+		}
+	};
+	
+	var processEquipmentSink = function(equip){
+		for (var resourceKey in equip.inputs){
+			if (resourceKey.substr(resourceKey.length-6) === "buffer") continue;
+			var qty = equip.inputs[resourceKey+"buffer"];
+			if (qty == 0){continue;}
+			
+			var value = qty * equip.cost;
+			
+			data.money += value;
+			equip.inputs[resourceKey+"buffer"] -= qty;
+		}
+	};
+	
+	var processEquipmentConverter = function (equip){
 		//Check if outputs are all empty
 		for (var resourceKey in equip.outputs){
 			if (resourceKey.substr(resourceKey.length-6) === "buffer") continue;
@@ -247,7 +329,12 @@
 			region.outputsByType[key].push(entity.id);
 			entity.outputs[key+"buffer"] = 0;
 		}
+		for (var key in entity.storage){
+			region.storageByType[key].push(entity.id);
+			entity.storage[key+"buffer"] = 0;
+		}
 		UiUpdateEntity(entity);
+		return entity;
 	};
 	//}**********End Game Engine****************
 	
@@ -328,7 +415,7 @@
 		});
 	};
 	
-	/*Update all the entities inputs/outputs*/
+	/*Update all the entities inputs/outputs/storage*/
 	var updateEntityList = function(){
 		if (data.regions[0] === undefined) return;
 		for (var key in data.regions[0].equipment){
@@ -349,6 +436,15 @@
 				if (rkey.substr(rkey.length-6) === "buffer") continue;
 				var item = entity.outputs[rkey];
 				var itemBuffer = entity.outputs[rkey+"buffer"];
+				var rtype = config.resourceTypes[rkey];
+				html += rtype.name + ": "+item+"/"+itemBuffer+" "+rtype.unit;
+			}
+			
+			html += "<br/>Storage:";
+			for (var rkey in entity.storage){
+				if (rkey.substr(rkey.length-6) === "buffer") continue;
+				var item = entity.storage[rkey];
+				var itemBuffer = entity.storage[rkey+"buffer"];
 				var rtype = config.resourceTypes[rkey];
 				html += rtype.name + ": "+item+"/"+itemBuffer+" "+rtype.unit;
 			}
