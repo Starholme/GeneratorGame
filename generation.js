@@ -150,14 +150,14 @@
 			var srcEquip = region.equipmentById[outputBuffers[i]];
 			
 			var qtyInSrc = srcEquip.outputs[resKey+"buffer"];
-			if (qtyInSrc == 0) break;
+			if (qtyInSrc == 0) continue;
 			var max = qtyInSrc > roomInBuffer ? roomInBuffer : qtyInSrc;
 			
 			roomInBuffer -= max;
 			srcEquip.outputs[resKey+"buffer"] -= max;
 			equip.inputs[resKey+"buffer"] += max;
 			
-			if (roomInBuffer == 0) break;
+			if (roomInBuffer == 0) return;
 		}
 		
 		//Look in storage
@@ -166,14 +166,14 @@
 			var srcEquip = region.equipmentById[storage[i]];
 			
 			var qtyInSrc = srcEquip.storage[resKey+"buffer"];
-			if (qtyInSrc == 0) break;
+			if (qtyInSrc == 0) continue;
 			var max = qtyInSrc > roomInBuffer ? roomInBuffer : qtyInSrc;
 			
 			roomInBuffer -= max;
 			srcEquip.storage[resKey+"buffer"] -= max;
 			equip.inputs[resKey+"buffer"] += max;
 			
-			if (roomInBuffer == 0) break;
+			if (roomInBuffer == 0) return;
 		}
 	};
 	
