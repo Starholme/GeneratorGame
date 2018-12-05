@@ -125,7 +125,8 @@
 		for (var resKey in region.inputsByType){
 			var inputs = region.inputsByType[resKey];
 			for (var i=0; i<inputs.length; i++){
-				processInputBuffer(resKey, inputs[i], region);
+				var noMoreOfTypeLeft = processInputBuffer(resKey, inputs[i], region);
+				if (noMoreOfTypeLeft) break;
 			}
 		}
 		
@@ -157,7 +158,7 @@
 			srcEquip.outputs[resKey+"buffer"] -= max;
 			equip.inputs[resKey+"buffer"] += max;
 			
-			if (roomInBuffer == 0) return;
+			if (roomInBuffer == 0) return false;
 		}
 		
 		//Look in storage
@@ -173,8 +174,10 @@
 			srcEquip.storage[resKey+"buffer"] -= max;
 			equip.inputs[resKey+"buffer"] += max;
 			
-			if (roomInBuffer == 0) return;
+			if (roomInBuffer == 0) return false;
 		}
+		
+		return true;
 	};
 	
 	var processStorage = function(resKey, equipId, region){
