@@ -253,7 +253,13 @@
 	
 	//{**********UI bits********************
 	var uiLoop = function(){
-		$("#money").text(data.money);
+		$("#money").text(data.money.toFixed(2));
+		
+		var hour = game.data.tick % 24;
+		var day = ((game.data.tick - hour) / 24) % 365;
+		var year = ((game.data.tick - hour - (day*24)) / 365);
+		
+		$("#gameTime").text("Hour:" + hour + " Day:" + day + " Year:" + year);
 		
 		updateEntityList();
 		
