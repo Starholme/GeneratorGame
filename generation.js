@@ -221,8 +221,18 @@
 	};
 	game.createRegion = createRegion;
 	
-	var createEntity = function(region, entityName){
-		var entity = JSON.parse(JSON.stringify(config.entities[entityName]))
+	var createEntity = function(region, entityName){		
+		var entity = JSON.parse(JSON.stringify(config.entities[entityName]));
+		if (data.money < entity.cost){
+			console.log('not enough money!');
+			return;
+		}
+		if (entity.type == "source" || entity.type == "sink"){
+			
+		}
+		else{
+			data.money -= entity.cost;
+		}
 		entity.id = data.nextId++;
 		entity.enabled = true;
 		entity.nameId = entityName;
