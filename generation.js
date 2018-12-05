@@ -85,6 +85,7 @@
 	
 	//{**********Game Engine****************
 	var gameloop = function(){
+		var tickTime = Date.now();
 		data.tick++;
 		
 		for (var i = 0; i<data.regions.length; i++){
@@ -96,7 +97,7 @@
 		{
 			setTimeout(gameloop, data.tickSpeed);
 		}
-		if (debug){console.log("tick end: " + data.tick);}
+		if (debug){console.log("tick end: " + data.tick + " " + (Date.now()-tickTime) + "ms");}
 	};
 	game.gameloop = gameloop;
 	
