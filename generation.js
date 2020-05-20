@@ -6,14 +6,14 @@
 		uiTickSpeed : 250,
 		tickSpeed : {stopped:-1, normal: 1000},
 		resourceTypes : {
-			e:{name:"Electricity", unit:"kw"},
-			o:{name:"Oil", unit:"L"}
+			electric:{name:"Electricity", unit:"kw"},
+			oil:{name:"Oil", unit:"L"}
 		},
 		entities:{
 			"ElectricalSubstation":{
 				name:"Electrical Substation",
 				type:"sink",
-				inputs:{e: 1000},
+				inputs:{electric: 1000},
 				outputs:{},
 				cost:0.14,
 				buildable:false,
@@ -22,8 +22,8 @@
 			"OilGenset20kw":{
 				name:"Oil Genset 20kw",
 				type:"electricGeneration",
-				inputs:{o:6},
-				outputs:{e:20},
+				inputs:{oil:6},
+				outputs:{electric:20},
 				cost:5000,
 				buildable:true,
 				id:-1
@@ -32,7 +32,7 @@
 				name:"Oil Truck",
 				type:"source",
 				inputs:{},
-				outputs:{o:10},
+				outputs:{oil:10},
 				cost:1.27,
 				buildable:false,
 				id:-1
@@ -40,7 +40,7 @@
 			"OilTank100":{
 				name:"Oil Tank 100L",
 				type:"storage",
-				storage:{o:100},
+				storage:{oil:100},
 				cost:500
 			}
 		}
@@ -62,16 +62,16 @@
 		equipment:[],
 		equipmentById:{}, //someEquipId:someEquipObject
 		inputsByType:{
-			e:[], //someEquipId,someEquipId2
-			o:[]
+			electric:[], //someEquipId,someEquipId2
+			oil:[]
 		},
 		outputsByType:{
-			e:[],
-			o:[]
+			electric:[],
+			oil:[]
 		},
 		storageByType:{
-			e:[],
-			o:[]
+			electric:[],
+			oil:[]
 		}
 	};
 	
