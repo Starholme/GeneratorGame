@@ -57,6 +57,9 @@
     <Content Include="babel.config.js" />
   </ItemGroup>
   <ItemGroup>
+    <TypeScriptCompile Include="src\engine\Config.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
     <TypeScriptCompile Include="src\engine\Engine.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>

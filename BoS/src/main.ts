@@ -3,8 +3,14 @@ import App from './App.vue';
 import { Engine } from './engine/Engine';
 
 declare global {
-    interface Window { Ui: Vue; Engine: Engine }
+    interface Window {
+        Ui: Vue;
+        Engine: Engine;
+        DEBUG: boolean;
+    }
 }
+
+window.DEBUG = true;
 
 Vue.config.productionTip = true;
 
@@ -14,4 +20,4 @@ const app = new Vue({
 app.$mount('#app');
 
 window.Ui = app;
-window.Engine = new Engine("moo3");
+window.Engine = new Engine();
