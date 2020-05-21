@@ -1,21 +1,20 @@
 <template>
     <div id="app">
-        <Home :msg="msg" />
-        <p>{{msg}} what</p>
+        <top-bar />
+        <Home msg="Hello" />
     </div>
 </template>
 
 <script lang="ts">
     import { Component, Vue } from 'vue-property-decorator';
     import Home from './components/Home.vue';
-
-    data: {  }
+    import TopBar from './components/TopBar.vue'
 
     @Component({
         components: {
-            Home
-        }, data: function () { return { msg: "testing2" }; }
-        
+            Home,
+            TopBar
+        }        
     })
     export default class App extends Vue { }
 </script>

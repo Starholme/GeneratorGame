@@ -14,10 +14,10 @@ window.DEBUG = true;
 
 Vue.config.productionTip = true;
 
+window.Engine = new Engine();
+
 const app = new Vue({
     render: h => h(App)
 });
 app.$mount('#app');
-
 window.Ui = app;
-window.Engine = new Engine();
