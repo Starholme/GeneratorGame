@@ -5,13 +5,14 @@ import Vue  from 'vue';
 
 export class Engine {
 
-	private tick = 0;
 	private tickSpeed = 0;
 
 	public state = Vue.observable({
 		tick: 0,
 		tickSpeedName:'Normal'
 	});
+
+	//private site = {}
 
     constructor() {
         window.onload = () => {
@@ -27,7 +28,6 @@ export class Engine {
 
 	private gameLoop() {
 		const tickTime = Date.now();
-		this.tick++;
 		this.state.tick++;
 
 		/*for (var i = 0; i < data.regions.length; i++) {
@@ -38,7 +38,7 @@ export class Engine {
 		if (this.tickSpeed > Config.TickSpeeds.Stopped) {
 			setTimeout(() => this.gameLoop(), this.tickSpeed);
 		}
-		if (window.DEBUG) { console.log("tick end: " + this.tick + " " + (Date.now() - tickTime) + "ms"); }
+		if (window.DEBUG) { console.log("tick end: " + this.state.tick + " " + (Date.now() - tickTime) + "ms"); }
 	};
 
 	public setTickSpeed(tickSpeedName: string): void {
