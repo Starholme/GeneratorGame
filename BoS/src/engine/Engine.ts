@@ -1,5 +1,5 @@
 //import Vue from 'vue';
-import { Config, TickSpeed } from './Config'
+import { Config } from './Config'
 import Vue  from 'vue';
 
 
@@ -9,7 +9,8 @@ export class Engine {
 	private tickSpeed = 0;
 
 	public state = Vue.observable({
-		tick : 0
+		tick: 0,
+		tickSpeedName:'Normal'
 	});
 
     constructor() {
@@ -20,7 +21,7 @@ export class Engine {
 
 	private init() {
 		console.log('Engine init');
-		this.tickSpeed = TickSpeed.normal;
+		this.tickSpeed = Config.TickSpeeds['Normal'];
 		this.gameLoop();
     }
 
@@ -34,15 +35,17 @@ export class Engine {
 		}
 		*/
 		//Schedule next tick
-		if (this.tickSpeed > TickSpeed.stopped) {
-			setTimeout(() => this.gameLoop(), 1000);
+		if (this.tickSpeed > Config.TickSpeeds.Stopped) {
+			setTimeout(() => this.gameLoop(), this.tickSpeed);
 		}
 		if (window.DEBUG) { console.log("tick end: " + this.tick + " " + (Date.now() - tickTime) + "ms"); }
 	};
 
-	public setTickSpeed(tickSpeed: TickSpeed): void {
-		const wasStopped = this.tickSpeed === TickSpeed.stopped;
-		this.tickSpeed = tickSpeed;
+	public setTickSpeed(tickSpeedName: string): void {
+		const newTickSpeed = Config.TickSpeeds[tickSpeedName];
+		const wasStopped = this.tickSpeed === Config.TickSpeeds.Stopped;
+		this.tickSpeed = newTickSpeed;
+		this.state.tickSpeedName = tickSpeedName;
 		if (wasStopped) {
 			this.gameLoop();
         }

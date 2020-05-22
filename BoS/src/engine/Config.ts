@@ -1,12 +1,14 @@
-enum TickSpeed {
-    stopped = -1,
-    normal = 1000
+interface Dictionary {
+    [index: string]: number;
 }
+
 const Config = {
-    
+    TickSpeeds: {
+        Stopped: -1,
+        Normal: 1000
+    } as Dictionary
 }
 
 export {
-    Config,
-    TickSpeed
+    Config
 }
