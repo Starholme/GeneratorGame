@@ -10,21 +10,22 @@
 </template>
 
 <script lang="ts">
+    import Vue from 'vue'
 
-    export default {
-        name : 'top-bar',
+    export default Vue.extend({
+        name:'top-bar',
 
-        data : function () {
+        data: function () {
             return {
-                tick: window.Engine.state.tick
+                state: window.Engine.state
             };
         },
 
-        computed : {
+        computed: {
             gameTime: function (): string {
-                var hour = window.Engine.state.tick % 24;
-                var day = ((window.Engine.state.tick - hour) / 24) % 365;
-                var year = ((window.Engine.state.tick - hour - (day * 24)) / 365);
+                var hour = this.state.tick % 24;
+                var day = ((this.state.tick - hour) / 24) % 365;
+                var year = ((this.state.tick - hour - (day * 24)) / 365);
 
                 return "Hour:" + hour + " Day:" + day + " Year:" + year;
             },
@@ -43,7 +44,7 @@
                 return false;
             }
         }
-    }
+    });
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
