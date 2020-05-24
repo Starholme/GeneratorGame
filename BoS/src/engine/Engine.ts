@@ -12,7 +12,10 @@ export class Engine {
 		tickSpeedName:'Normal'
 	});
 
-	//private site = {}
+	private network = {
+		resource: Config.Resources.Oil,
+
+	};
 
     constructor() {
         window.onload = () => {
