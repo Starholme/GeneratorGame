@@ -1,21 +1,20 @@
 //import Vue from 'vue';
 import { Config } from './Config'
 import Vue  from 'vue';
+import { Network } from './Network';
 
 
 export class Engine {
 
 	private tickSpeed = 0;
+	private nextId = 0;
 
 	public state = Vue.observable({
 		tick: 0,
 		tickSpeedName:'Normal'
 	});
 
-	private network = {
-		resource: Config.Resources.Oil,
-
-	};
+	private network = new Network(this.getNextId(), 'first', Config.Resources.Oil);
 
     constructor() {
         window.onload = () => {
@@ -33,10 +32,8 @@ export class Engine {
 		const tickTime = Date.now();
 		this.state.tick++;
 
-		/*for (var i = 0; i < data.regions.length; i++) {
-			processRegion(data.regions[i]);
-		}
-		*/
+		this.network.Update();
+		
 		//Schedule next tick
 		if (this.tickSpeed > Config.TickSpeeds.Stopped) {
 			setTimeout(() => this.gameLoop(), this.tickSpeed);
@@ -52,5 +49,13 @@ export class Engine {
 		if (wasStopped) {
 			this.gameLoop();
         }
+	}
+
+	public getNextId(): number {
+		return this.nextId++;
+	}
+
+	public getNetwork(): Network {
+		return this.network;
     }
 }

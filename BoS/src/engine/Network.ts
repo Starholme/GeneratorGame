@@ -1,4 +1,4 @@
-import { Box, Levels, Resource } from './Interfaces'
+import { Box, Levels, Resource } from './interfaces'
 
 interface Lvl {
     current: number;
@@ -8,14 +8,20 @@ interface Lvl {
 }
 
 export class Network {
+    public id: number;
     private name: string;
     private resource: Resource;
     private boxes: Array<Box>;
 
-    constructor(name: string, resource: Resource) {
+    constructor(id: number, name: string, resource: Resource) {
+        this.id = id;
         this.name = name
         this.resource = resource;
         this.boxes = new Array<Box>();
+    }
+
+    public GetDescription() {
+        return this.name + ': ' + this.resource.name;
     }
 
     public AddBox(box: Box) {
